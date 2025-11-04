@@ -20,7 +20,6 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: "UniverseId introuvable" });
     }
 
-    // 2️⃣ Obtenir les infos du jeu
     const [votesRes, detailsRes] = await Promise.all([
       fetch(`https://games.roblox.com/v1/games/votes?universeIds=${universeId}`),
       fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`),
