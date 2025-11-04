@@ -47,7 +47,7 @@ export default async function handler(req, res) {
       playing: info.playing,
       visits: info.visits,
       favorites: info.favoritedCount,
-      likes: votes.upVotes,
+      upVotes: votes.upVotes,
       downVotes: votes.downVotes,
       ratio:
         votes.upVotes + votes.downVotes > 0
