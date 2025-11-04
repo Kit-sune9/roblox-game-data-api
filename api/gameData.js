@@ -20,13 +20,14 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: "UniverseId introuvable" });
     }
 
+    // 2️⃣ Obtenir les infos du jeu
     const [votesRes, detailsRes] = await Promise.all([
       fetch(`https://games.roblox.com/v1/games/votes?universeIds=${universeId}`),
       fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`),
     ]);
 
     if (!votesRes.ok || !detailsRes.ok) {
-      return res.status(502).json({ error: "Erreur lors de la récupération des données du jeu" });
+      return res.status(502).json({ error: "Erreur récupération des données Roblox" });
     }
 
     const votesData = await votesRes.json();
@@ -36,25 +37,27 @@ export default async function handler(req, res) {
     const info = detailsData.data?.[0];
 
     if (!votes || !info) {
-      return res.status(404).json({ error: "Aucune donnée trouvée pour ce jeu" });
+      return res.status(404).json({ error: "Aucune donnée trouvée" });
     }
 
-    const result = {
+    return res.status(200).json({
       placeId: Number(placeId),
-      universeId: universeId,
+      universeId,
       name: info.name,
       creatorName: info.creator?.name,
       playing: info.playing,
       visits: info.visits,
       favorites: info.favoritedCount,
-      upVotes: votes.upVotes,
+      likes: votes.upVotes,
       downVotes: votes.downVotes,
+      ratio:
+        votes.upVotes + votes.downVotes > 0
+          ? Math.round((votes.upVotes / (votes.upVotes + votes.downVotes)) * 100)
+          : 0,
       lastUpdated: new Date().toISOString(),
-    };
-
-    return res.status(200).json(result);
+    });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Erreur interne du proxy", details: err.message });
+    return res.status(500).json({ error: "Erreur interne", details: err.message });
   }
 }
